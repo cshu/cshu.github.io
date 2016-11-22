@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Check Endianness Using JavaScript</title>
+	</head>
+	<body>
+		<p style="font-size:200%">Your representation is <span id="res" style="font-weight:bold;color:#582868;"></span>.</p>
+		<code style="white-space:pre-wrap;background-color:#A6A6A6;display:block;">
+var arrbuf = new ArrayBuffer(2);
+new DataView(arrbuf).setUint8(0, 1);
+var islittleendian = new Uint16Array(arrbuf)[0] === 1;
+		</code>
+		<script>
+			var arrbuf = new ArrayBuffer(2);
+			new DataView(arrbuf).setUint8(0, 1);
+			var islittleendian = new Uint16Array(arrbuf)[0] === 1;
+			document.getElementById('res').textContent = islittleendian ? 'little-endian' : 'big-endian';
+		</script>
+	</body>
+</html>
