@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" /><!--usually unnecessary-->
+		<title>Detect Text Encoding Using TextDecoder</title>
+	</head>
+	<body>
+		<p>Select a file to read. Be careful with big file.</p>
+		<input id="fileelem" type="file" />
+		<p>(For command line tool, see also <a href="http://github.com/cshu/detect-text-file-encoding">here</a>.)</p>
+		<hr />
+		<div id="res">
+		</div>
+		<script src="https://cdn.rawgit.com/inexorabletash/text-encoding/master/lib/encoding-indexes.js"></script>
+		<script src="https://cdn.rawgit.com/inexorabletash/text-encoding/master/lib/encoding.js"></script>
+		<script src="detect-text-file-encoding.bundle.js"></script>
+	</body>
+</html>
