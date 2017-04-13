@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" /><!--usually unnecessary-->
+		<title>Language Ranking</title>
+	</head>
+	<body style="text-align:center">
+		<input style="width:155px" id="usernm" placeholder="Enter a GitHub username" autofocus />
+		<div>Using GitHub API.<br />Forked repositories are not included.<br />Note sometimes the type of detected language of GitHub API can be wrong.<br /><br /></div>
+		<div id="resultd"></div>
+		<script>
+		function xhrlistl(listofre,reslist){
+			var re=listofre.pop();
+			if(!re){
+				var sum=reslist.sumofall/100;
+				delete reslist.sumofall;
+				var rank=Object.keys(reslist);
+				rank.sort(function(x,y){
+					return reslist[y]-reslist[x];
+				});
+				document.getElementById('resultd').innerHTML='';
+				var resstr='';
+				for(;;){
+					var l=rank.shift();
+					if(!l) break;
+					document.getElementById('resultd').appendChild(document.createElement('div')).textContent=l+': '+reslist[l]+' bytes ('+(reslist[l]/sum).toFixed(2)+'%)';
+				}
+				return;
+			}
+
+			if(re.fork){
+				xhrlistl(listofre,reslist);
+			}else{
+				var xhr = new XMLHttpRequest;
+				xhr.open('GET',re.languages_url);
+				xhr.onreadystatechange = function () {
+					if(xhr.readyState===XMLHttpRequest.DONE){
+						switch(xhr.status){
+						case 200:
+							var xres=JSON.parse(xhr.response);
+							for(var pro in xres){//there is no need for hasOwnProperty here?
+								if(reslist[pro]) reslist[pro]+=xres[pro];
+								else reslist[pro]=xres[pro];
+								reslist.sumofall+=xres[pro];
+							}
+							xhrlistl(listofre,reslist);
+							break;
+						default:
+							throw new Error(xhr.status);
+							break;
+						}
+					}
+				};
+				xhr.send(null);
+			}
+		}
+		document.getElementById('usernm').onkeydown=function(ke){
+			if(ke.keyCode!==0x0d)return;
+			if(!this.value)return;
+			var xhr = new XMLHttpRequest;
+			xhr.open('GET','https://api.github.com/users/'+this.value+'/repos');
+			xhr.onreadystatechange = function () {
+				if(xhr.readyState===XMLHttpRequest.DONE){
+					switch(xhr.status){
+					case 200:
+						var xres=JSON.parse(xhr.response);
+						xhrlistl(xres,{sumofall:0});
+						break;
+					default:
+						throw new Error(xhr.status);
+						break;
+					}
+				}
+			};
+			xhr.send(null);
+		};
+			
+		</script>
+	</body>
+</html>
