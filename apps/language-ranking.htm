@@ -9,6 +9,7 @@
 		<div>Using GitHub API.<br />Forked repositories are not included.<br />Note sometimes the type of detected language of GitHub API can be wrong.<br /><br /></div>
 		<div id="resultd"></div>
 		<script>
+		var h_usernm=document.getElementById('usernm');
 		function xhrlistl(listofre,reslist){
 			var re=listofre.pop();
 			if(!re){
@@ -25,7 +26,9 @@
 					if(!l) break;
 					document.getElementById('resultd').appendChild(document.createElement('div')).textContent=l+': '+reslist[l]+' bytes ('+(reslist[l]/sum).toFixed(2)+'%)';
 				}
-				document.getElementById('usernm').nextSibling.textContent='To do another search, refresh the page.';
+				h_usernm.nextSibling.replaceChild(document.createElement('a'),h_usernm.firstChild);
+				h_usernm.firstChild.text='New Search';
+				h_usernm.href=location.protocol+'//'+location.host+location.pathname;
 				return;
 			}
 
@@ -55,9 +58,11 @@
 				xhr.send(null);
 			}
 		}
-		function initre(usnm){
+		function initre(){
+			this.readOnly=true;
+			this.nextSibling.style.display='';
 			var xhr = new XMLHttpRequest;
-			xhr.open('GET','https://api.github.com/users/'+usnm+'/repos');
+			xhr.open('GET','https://api.github.com/users/'+this.value+'/repos');
 			xhr.onreadystatechange = function () {
 				if(xhr.readyState===XMLHttpRequest.DONE){
 					switch(xhr.status){
@@ -74,18 +79,15 @@
 			xhr.send(null);
 		}
 		if(location.search){
-			document.getElementById('usernm').style.display='none';
-			document.getElementById('usernm').nextSibling.style.display='';
 			var usnm=location.search.slice(location.search.indexOf('=')+1);
-			initre(usnm);
+			h_usernm.value=usnm;
+			initre.call(h_usernm);
 		}else{
-			document.getElementById('usernm').onkeydown=function(ke){
+			h_usernm.onkeydown=function(ke){
 				if(ke.keyCode!==0x0d)return;
 				if(!this.value)return;
 				this.onkeydown=null;
-				this.readOnly=true;
-				this.nextSibling.style.display='';
-				initre(this.value);
+				initre.call(this);
 			};
 		}
 			
