@@ -55,14 +55,9 @@
 				xhr.send(null);
 			}
 		}
-		document.getElementById('usernm').onkeydown=function(ke){
-			if(ke.keyCode!==0x0d)return;
-			if(!this.value)return;
-			this.onkeydown=null;
-			this.readOnly=true;
-			this.nextSibling.style.display='';
+		function initre(usnm){
 			var xhr = new XMLHttpRequest;
-			xhr.open('GET','https://api.github.com/users/'+this.value+'/repos');
+			xhr.open('GET','https://api.github.com/users/'+usnm+'/repos');
 			xhr.onreadystatechange = function () {
 				if(xhr.readyState===XMLHttpRequest.DONE){
 					switch(xhr.status){
@@ -77,7 +72,22 @@
 				}
 			};
 			xhr.send(null);
-		};
+		}
+		if(location.search){
+			document.getElementById('usernm').style.display='none';
+			document.getElementById('usernm').nextSibling.style.display='';
+			var usnm=location.search.slice(location.search.indexOf('=')+1);
+			initre(usnm);
+		}else{
+			document.getElementById('usernm').onkeydown=function(ke){
+				if(ke.keyCode!==0x0d)return;
+				if(!this.value)return;
+				this.onkeydown=null;
+				this.readOnly=true;
+				this.nextSibling.style.display='';
+				initre(this.value);
+			};
+		}
 			
 		</script>
 	</body>
