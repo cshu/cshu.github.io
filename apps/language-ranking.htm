@@ -6,7 +6,7 @@
 	</head>
 	<body style="text-align:center">
 		<input style="width:155px" id="usernm" placeholder="Enter a GitHub username" autofocus /><div style="display:none">Loading...</div>
-		<div>Using GitHub API.<br />Forked repositories are not included.<br />Note sometimes the type of detected language of GitHub API can be wrong.<br /><br /></div>
+		<div>Using GitHub API.<br />Forked repositories are not included.<br />Note sometimes the type of detected language of GitHub API can be wrong.<br />Note requesting too many times can result in failure due to rate limit.<br /><br /></div>
 		<div id="resultd"></div>
 		<script>
 		var h_usernm=document.getElementById('usernm');
@@ -50,7 +50,8 @@
 							xhrlistl(listofre,reslist);
 							break;
 						default:
-							throw new Error(xhr.status);
+							//throw new Error(xhr.status);
+							alert('GitHub API status code of error response: '+xhr.status);
 							break;
 						}
 					}
@@ -71,7 +72,8 @@
 						xhrlistl(xres,{sumofall:0});
 						break;
 					default:
-						throw new Error(xhr.status);
+						//throw new Error(xhr.status);
+						alert('GitHub API status code of error response: '+xhr.status);
 						break;
 					}
 				}
