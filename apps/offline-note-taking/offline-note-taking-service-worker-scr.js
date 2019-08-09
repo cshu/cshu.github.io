@@ -9,6 +9,6 @@ self.addEventListener('fetch',function(e) {
 	event.responseWith(
 		caches.match(e.request).then(function(resp){
 			return resp || fetch(e.request);
-		});
+		})
 	);
 });
