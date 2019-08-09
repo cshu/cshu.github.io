@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"><!--usually unnecessary-->
+		<meta name="description" content="PWA app for note-taking even when there is no internet connection">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+		<style>
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+	a{
+		text-decoration:none;
+		padding: 13px;
+		color: white;
+		background-color: #aaa;
+	}
+	a:focus{
+		background-color: #3c79c3;
+	}
+		</style>
+		<title>Offline Note-Taking</title>
+		<link rel="manifest" href="offline-note-taking-manifest.json">
+	</head>
+	<body>
+		<table style="width:100%;text-align: center">
+			<tr>
+				<td style="padding:8px">
+				<label>Note <input list="notes-dl" id="notes-in" style="width:99px" autofocus /></label>
+				<datalist id="notes-dl"></datalist>
+				<td><a href="#" id="new-note">New</a>
+				<td><a href="#" id="del-note" style="display:none;background-color:black">Delete</a>
+			<tr>
+				<td style="display:none;" colspan="3">
+				<textarea id="text-edit" style="resize:none;width:98%;"></textarea>
+				<div id="edittime"></div>
+				<a href="#" id="sav-note" style="right:0;left:0;bottom:0;position:fixed;height:35px">SAVE</a>
+		</table>
+		<script>
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
+	alert('May lose data on iOS, because iOS can delete localStorage when space is needed. Not recommended.');
+}
+//todo: disallow multiple tabs
+if(!navigator.serviceWorker){
+	alert('Browser does not support service worker');
+	throw new Error('Browser does not support service worker');
+}
+navigator.serviceWorker.register('offline-note-taking-service-worker-scr.js');
+var h_edittime = document.getElementById('edittime');
+var h_text_edit = document.getElementById('text-edit');
+var h_notes_dl = document.getElementById('notes-dl');
+var h_notes_in = document.getElementById('notes-in');
+var h_del_note = document.getElementById('del-note');
+var h_sav_note = document.getElementById('sav-note');
+var ont_prefix = 'ont;';
+for (var i = 0; i < localStorage.length; ++i) {
+	var note_title = localStorage.key(i);
+	if(note_title.lastIndexOf(ont_prefix,0)===0){
+		h_notes_dl.appendChild(new Option);
+		h_notes_dl.lastChild.value = note_title.slice(ont_prefix.length);
+	}
+}
+window.onresize = function(){
+	if(!h_text_edit.parentNode.style.display)
+		h_text_edit.style.height=h_sav_note.getBoundingClientRect().y-h_text_edit.getBoundingClientRect().y-55+'px';
+};
+h_notes_in.onclick=h_notes_in.onfocus=function(){this.setSelectionRange(0, this.value.length);};
+h_notes_in.oninput=function(){
+	for(var optionElement of h_notes_dl.children){
+		if(optionElement.value === h_notes_in.value){
+			var note_read = localStorage.getItem(ont_prefix+optionElement.value);
+			var ind_of_sep = note_read.indexOf(';');
+			h_edittime.textContent = new Date(parseFloat(note_read.slice(0, ind_of_sep))).toJSON();
+			h_text_edit.value = note_read.slice(ind_of_sep+1);
+			h_text_edit.parentNode.style.display = '';
+			h_del_note.style.display = '';
+			window.onresize();
+			return;
+		}
+	}
+	h_text_edit.parentNode.style.display='none';
+	h_del_note.style.display='none';
+};
+document.getElementById('new-note').onclick=function(e){
+	e.preventDefault();e.stopPropagation();
+	var title = prompt('New note title ','');
+	if(!title) return;
+	var new_option = new Option;
+	new_option.value = title;
+	if(!new_option.value) return;
+	for(var optionElement of h_notes_dl.children){
+		if(optionElement.value === new_option.value){
+			alert('Duplicate title');
+			return;
+		}
+	}
+	localStorage.setItem(ont_prefix+new_option.value, Date.now()+';');
+	h_notes_dl.appendChild(new_option);
+	h_notes_in.value = new_option.value;
+	h_notes_in.oninput();
+	setTimeout(function(){h_text_edit.focus();},0);
+};
+h_del_note.onclick=function(e){
+	e.preventDefault();e.stopPropagation();
+	for(var optionElement of h_notes_dl.children){
+		if(optionElement.value === h_notes_in.value){
+			break;
+		}
+	}
+	h_notes_dl.removeChild(optionElement);
+	localStorage.removeItem(ont_prefix+h_notes_in.value);
+	h_notes_in.value = '';
+	h_notes_in.oninput();
+};
+h_text_edit.onchange=function(){
+	var date_now = Date.now();
+	localStorage.setItem(ont_prefix+h_notes_in.value,date_now+';'+h_text_edit.value);
+	h_edittime.textContent = new Date(date_now).toJSON();
+};
+h_sav_note.onclick=function(e){
+	e.preventDefault();e.stopPropagation();
+}
+		</script>
+

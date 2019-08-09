@@ -1,0 +1,12 @@
+{
+	"name":"Offline Note-Taking",
+	"short_name":"ONT",
+	"icons": [{
+		"src": "offline-note-taking.png",
+		"sizes": "512x512",
+		"type": "image/png"
+	}],
+	"start_url":"index.htm",
+	"display": "standalone",
+	"theme_color": "#eee"
+}
