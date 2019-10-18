@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"><!--usually unnecessary-->
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+		<title>RSS Download Files</title>
+	</head>
+	<body style="text-align: center">
+				<label>RSS <input id="url" /></label>
+				<br><br><button id=downl_btn>Download</button>
+				<br><br>Firefox needs <code>media.play-stand-alone</code> set to false. so files like mp3 are downloaded instead of played.
+				<br><br>Default max number of downloads is 5. Use ?10 at the end of the address bar to use a different max.
+				<br><br>Supposedly every file can only be downloaded at most once, because every download is recorded.
+		<script>
+var max_num_download = 5;
+if(location.search){
+	max_num_download=Number(location.search.slice(1));
+}
+var MAX_NUM_SAVED_URL = 100;
+var STORAGE_PREFIX = 'rss-download-files;';
+var downloaded_files = localStorage.getItem(STORAGE_PREFIX+'downloaded_files');
+var downloaded = downloaded_files ? downloaded_files.split('\n') : [];
+var selected_url=localStorage.getItem(STORAGE_PREFIX+'selected_url');
+if(selected_url){
+	document.getElementById('url').value=selected_url;
+}
+document.getElementById('url').oninput=function(){
+	localStorage.setItem(STORAGE_PREFIX+'selected_url',this.value);
+};
+document.getElementById('downl_btn').onclick=function(){
+	var xhr = new XMLHttpRequest;
+	xhr.open('GET', document.getElementById('url').value);
+	xhr.onreadystatechange = function () {
+		if(xhr.readyState===XMLHttpRequest.DONE){
+			switch(xhr.status){
+			case 200:
+				var parser = new DOMParser;
+				var doc = parser.parseFromString(xhr.response, "text/xml");
+				var lst = Array.from(doc.getElementsByTagName('enclosure'));
+				for(var i=0;i<max_num_download;++i){
+					if(!lst[i])break;
+					var url=lst[i].getAttribute('url');
+					if(downloaded.indexOf(url) !== -1){
+						break;
+					}
+					downloaded.push(url);
+					//var anchor = document.createElement('a');
+					//anchor.href = lst[i].getAttribute('url');
+					//anchor.download = anchor.pathname.split('/').pop();
+					//anchor.target = '_blank';
+					//document.body.appendChild(anchor);
+					//anchor.click();
+					//document.body.removeChild(anchor);
+					open(url);
+				}
+				if(downloaded.length>MAX_NUM_SAVED_URL){
+					downloaded=downloaded.slice(downloaded.length-MAX_NUM_SAVED_URL);
+				}
+				localStorage.setItem(STORAGE_PREFIX+'downloaded_files',downloaded.join('\n'));
+				location.reload();
+				break;
+			default:
+				//throw new Error(xhr.status);
+				alert('Status: '+xhr.status+'\n'+xhr.response);
+				break;
+			}
+		}
+	};
+	xhr.send(null);
+};
+		</script>
+
+
