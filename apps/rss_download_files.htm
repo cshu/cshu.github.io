@@ -52,6 +52,10 @@ document.getElementById('downl_btn').onclick=function(){
 					//anchor.click();
 					//document.body.removeChild(anchor);
 					open(url);
+					//
+					//? should check whether open is successful? but no reliable way to do it?
+					//var opened = open(url);
+					//if(opened && !opened.closed && typeof opened.closed !== 'undefined') downloaded.push(url);
 				}
 				if(downloaded.length>MAX_NUM_SAVED_URL){
 					downloaded=downloaded.slice(downloaded.length-MAX_NUM_SAVED_URL);

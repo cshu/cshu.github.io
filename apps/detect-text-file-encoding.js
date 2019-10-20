@@ -8,7 +8,7 @@ document.getElementById('fileelem').onchange=function(){
 		var fileReader = new FileReader();
 		fileReader.onload = function() {
 			decodewithlbls(new DataView(this.result));
-		}
+		};
 		fileReader.readAsArrayBuffer(this.files[0]);
 	}
 };
